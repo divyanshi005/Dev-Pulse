@@ -1,0 +1,11 @@
+Why did you store raw JSON instead of directly inserting into PostgreSQL?
+"To preserve the original API response for debugging, reprocessing, and historical analysis.
+ It also decouples extraction from transformation."
+
+Why did you introduce a transformer?
+"The loader should not depend on GitHub's API structure. 
+The transformer converts API-specific JSON into our internal Repository model, making the loader reusable."
+
+Why use ON CONFLICT?
+"To make the ETL idempotent. 
+Running the pipeline multiple times updates existing repositories instead of creating duplicates."

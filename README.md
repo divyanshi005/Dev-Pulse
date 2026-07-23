@@ -1,2 +1,35 @@
-# Dev-Pulse
-A system that an answer questions like which github repositories are trending, which programming languages are growing, which AI frameworks are most discussed on Reddit, what skills are appearing most often in software engineering job postings, which open-source projects are gaining contributors.
+# DevPulse
+
+DevPulse is a data engineering project that collects data from developer platforms such as GitHub, Reddit, Stack Exchange, and job APIs.
+
+The project builds an analytics warehouse that answers questions such as:
+
+- Which repositories are trending?
+- Which programming languages are growing?
+- Which AI frameworks are gaining popularity?
+- Which skills are most requested in software engineering jobs?
+
+## Tech Stack
+
+- Python
+- PostgreSQL
+- SQLAlchemy
+- Streamlit
+- Docker
+- GitHub Codespaces
+
+## Project Architecture
+
+API Sources
+↓
+Extractors
+↓
+Raw Storage
+↓
+Staging
+↓
+Warehouse
+↓
+Analytics Views
+↓
+Dashboard
