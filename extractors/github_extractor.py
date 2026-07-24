@@ -1,5 +1,5 @@
 import requests
-
+from datetime import datetime, timedelta
 from config.settings import settings
 from config.logger import logger
 
@@ -18,31 +18,55 @@ class GitHubExtractor:
             "X-GitHub-Api-Version": "2022-11-28",
         }
 
-    def get_trending_repositories(self):
+    def get_trending_repositories(self,pages: int = 3,per_page: int = 10):
 
         url = f"{self.BASE_URL}/search/repositories"
-
-        params = {
-            "q": "stars:>1000",
+        query = self.get_trending_query()
+        all_repositories = []
+        for page in range(1, pages + 1):
+            params = {
+            "q": query,
             "sort": "stars",
             "order": "desc",
-            "per_page": 10,
+            "per_page": per_page,
+            "page": page
         }
 
-        logger.info("Fetching repositories from GitHub...")
+       
+            logger.info(f"Fetching page {page}...")
 
-        response = requests.get(
-            url,
-            headers=self.headers,
-            params=params,
-            timeout=30,
-        )
+            response = requests.get(
+                url,
+                headers=self.headers,
+                params=params,
+                timeout=30,
+            )
 
-        response.raise_for_status()
+            response.raise_for_status()
+            data = response.json()
 
-        logger.success("GitHub API request successful.")
+            items = data["items"]
+            if not items:
+                break
+            all_repositories.extend(items)
 
-        return response.json()
+        logger.success(
+                f"Fetched {len(all_repositories)} repositories."
+            )
+        return {"items": all_repositories}
+
+
+    def get_trending_query(self, days: int = 30) -> str:
+        """
+        Build a GitHub search query for trending repositories.
+        """
+
+        since = (
+            datetime.utcnow()
+            - timedelta(days=days)
+        ).strftime("%Y-%m-%d")
+   
+        return f"created:>{since}"
 
 
 # NOTE: this extrator's job is only to fetch the files, not to save it. 
