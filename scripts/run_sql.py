@@ -6,37 +6,48 @@ from config.database import database
 from config.logger import logger
 
 DDL_FOLDER = Path("warehouse/ddl")
+VIEW_PATH = Path("warehouse/views")
 
+def execute_sql_file(conn, sql_file):
+
+    sql = sql_file.read_text().strip()
+
+    if not sql:
+        logger.warning(f"Skipping empty file: {sql_file.name}")
+        return
+
+    sql_without_comments = "\n".join(
+        line
+        for line in sql.splitlines()
+        if not line.strip().startswith("--")
+    ).strip()
+
+    if not sql_without_comments:
+        logger.warning(f"Skipping comment-only file: {sql_file.name}")
+        return
+
+    conn.execute(text(sql))
+
+    logger.success(f"Finished {sql_file.name}")
 
 def run_all_migrations():
-    sql_files = sorted(DDL_FOLDER.glob("*.sql"))
-
     with database.engine.begin() as conn:
-        for sql_file in sql_files:
+
+        logger.info("Running DDL...")
+
+        for sql_file in sorted(DDL_FOLDER.glob("*.sql")):
 
             logger.info(f"Running {sql_file.name}")
 
-            sql = sql_file.read_text().strip()
+            execute_sql_file(conn, sql_file)
 
-            # Skip empty files
-            if not sql:
-                logger.warning(f"Skipping empty file: {sql_file.name}")
-                continue
+        logger.info("Creating analytics views...")
 
-            # Skip files that only contain SQL comments
-            sql_without_comments = "\n".join(
-                line for line in sql.splitlines()
-                if not line.strip().startswith("--")
-            ).strip()
+        for sql_file in sorted(VIEW_PATH.glob("*.sql")):
 
-            if not sql_without_comments:
-                logger.warning(f"Skipping comment-only file: {sql_file.name}")
-                continue
+            logger.info(f"Running {sql_file.name}")
 
-            conn.execute(text(sql))
-
-            logger.success(f"Finished {sql_file.name}")
-
+            execute_sql_file(conn, sql_file)
 
 if __name__ == "__main__":
     run_all_migrations()
