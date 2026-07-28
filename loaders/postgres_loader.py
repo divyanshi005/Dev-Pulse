@@ -8,6 +8,62 @@ from config.logger import logger
 from models.repository import Repository
 
 class PostgresLoader:
+    def load_stackexchange_questions(self, questions):
+        """
+        Load Stack Exchange questions into the staging table.
+        """
+        query=text("""
+        INSERT INTO staging.stackexchange_questions (
+            question_id,
+            title,
+            owner_name,
+            score,
+            answer_count,
+            view_count,
+            creation_date,
+            tags
+        )
+        VALUES (
+            :question_id,
+            :title,
+            :owner_name,
+            :score,
+            :answer_count,
+            :view_count,
+            :creation_date,
+            :tags
+        )
+        ON CONFLICT (question_id)
+        DO UPDATE SET
+            title = EXCLUDED.title,
+            owner_name = EXCLUDED.owner_name,
+            score = EXCLUDED.score,
+            answer_count = EXCLUDED.answer_count,
+            view_count = EXCLUDED.view_count,
+            tags = EXCLUDED.tags;""")
+        with database.engine.begin() as conn:
+
+            for question in questions:
+
+                conn.execute(
+                    query,
+                    {
+                        "question_id": question.question_id,
+                        "title": question.title,
+                        "owner_name": question.owner_name,
+                        "score": question.score,
+                        "answer_count": question.answer_count,
+                        "view_count": question.view_count,
+                        "creation_date": question.creation_date,
+                        "tags": question.tags,
+                    },
+                )
+
+        logger.success(
+            f"Loaded {len(questions)} Stack Exchange questions into staging."
+        )
+                
+
 
     def load_github_repositories(self,repositories: list[Repository]):
 
