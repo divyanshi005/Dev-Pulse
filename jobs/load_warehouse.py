@@ -7,10 +7,13 @@ logger.info("Loading dimensions...")
 
 loader.load_languages()
 loader.load_owners()
+
 loader.load_repositories()
-
-logger.info("Loading facts...")
-
 loader.load_metrics()
+
+loader.load_questions()
+loader.load_tags()
+loader.load_question_tags()
+loader.load_question_metrics()
 
 logger.success("Warehouse loading complete.")

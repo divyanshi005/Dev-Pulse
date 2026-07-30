@@ -1,4 +1,4 @@
-CREATE TABLE staging.stackexchange_questions (
+CREATE TABLE IF NOT EXISTS staging.stackexchange_questions (
     question_id BIGINT PRIMARY KEY,
     title TEXT NOT NULL,
     owner_name TEXT,

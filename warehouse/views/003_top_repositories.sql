@@ -4,7 +4,7 @@ SELECT
 
     r.full_name AS repository_name,
 
-    o.owner_login,
+    o.owner_name,
 
     l.language_name,
 

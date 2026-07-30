@@ -20,9 +20,12 @@ CREATE TABLE IF NOT EXISTS warehouse.dim_owner (
 
     owner_id SERIAL PRIMARY KEY,
 
-    owner_login TEXT UNIQUE NOT NULL,
+    owner_name TEXT  NOT NULL,
 
-    owner_type TEXT NOT NULL
+    owner_type TEXT ,
+
+    platform TEXT,
+    UNIQUE (owner_name, platform)
 
 );
 
@@ -62,7 +65,7 @@ CREATE TABLE IF NOT EXISTS warehouse.fact_repository_metrics (
 
     metric_id BIGSERIAL PRIMARY KEY,
 
-    repository_id BIGINT REFERENCES warehouse.dim_repository(repository_id),
+    repository_id BIGINT UNIQUE REFERENCES warehouse.dim_repository(repository_id),
 
     stars INTEGER,
 
@@ -77,5 +80,70 @@ CREATE TABLE IF NOT EXISTS warehouse.fact_repository_metrics (
     pushed_at TIMESTAMP,
 
     collected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+);
+
+
+----------------------------------------------------
+-- Questions Dimensions
+----------------------------------------------------
+
+
+CREATE TABLE IF NOT EXISTS warehouse.dim_question(
+    
+    question_id BIGINT PRIMARY KEY,
+
+    title TEXT NOT NULL,
+
+    owner_id INTEGER REFERENCES warehouse.dim_owner(owner_id),
+
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+----------------------------------------------------
+-- Questions Metrics Fact
+----------------------------------------------------
+
+
+CREATE TABLE IF NOT EXISTS warehouse.fact_question_metrics(
+
+    metric_id BIGSERIAL PRIMARY KEY,
+
+    question_id BIGINT UNIQUE REFERENCES warehouse.dim_question(question_id),
+
+    score INTEGER,
+
+    answer_count INTEGER,
+
+    view_count INTEGER,
+
+    last_loaded TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+);
+
+----------------------------------------------------
+-- TAG Dimensions
+----------------------------------------------------
+
+
+CREATE TABLE IF NOT EXISTS warehouse.dim_tag(
+
+    tag_id SERIAL PRIMARY KEY,
+
+    tag_name TEXT UNIQUE NOT NULL
+
+);
+
+----------------------------------------------------
+-- Bridge Table for Many-to-Many Relationship between Questions and Tags
+----------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS warehouse.bridge_question_tag(
+
+    question_id BIGINT REFERENCES warehouse.dim_question(question_id),
+
+    tag_id INTEGER REFERENCES warehouse.dim_tag(tag_id),
+
+    PRIMARY KEY (question_id, tag_id)
 
 );

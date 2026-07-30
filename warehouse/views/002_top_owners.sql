@@ -1,8 +1,7 @@
 CREATE OR REPLACE VIEW analytics.top_owners AS
 
 SELECT
-
-    o.owner_login,
+    o.owner_name,
 
     COUNT(DISTINCT r.repository_id) AS repository_count,
 
@@ -20,6 +19,6 @@ ON o.owner_id = r.owner_id
 JOIN warehouse.fact_repository_metrics f
 ON r.repository_id = f.repository_id
 
-GROUP BY o.owner_login
+GROUP BY o.owner_name
 
 ORDER BY total_stars DESC;
